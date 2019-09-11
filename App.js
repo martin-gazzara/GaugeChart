@@ -5,15 +5,9 @@ import GaugeChart from './components/GaugeChart';
 const App = () => {
   return (
     <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-      <GaugeChart data={{
-        current_value: 400,
-        target_value: 300,
-        final_value: 420
-      }}/>
-      <GaugeChart data={{
-        current_value: 199,
-        target_value: 300,
-        final_value: 420
+      <GaugeChart title='Title' data={{
+        currentPercentage: 100,
+        targetPercentage: 65
       }}/>
     </View>
   )

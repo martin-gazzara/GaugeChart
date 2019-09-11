@@ -3,7 +3,7 @@ import { View, Text } from 'react-native';
 import { VictoryPie } from 'victory-native';
 
 const indicatorWidth = 2; // indicators's width in degrees;
-const totalArchWidth = 220; // this represents the total arch width,
+const totalArchWidth = 270; // this represents the total arch width as degrees,
 const valueColor = '#55a4b1';
 const emptyColor = '#e5e5e5';
 const indicatorColor = '#000'; 
@@ -13,64 +13,69 @@ const setDegrees = (percentage) => {
 }
 
 
-const GaugeChart = ({data}) => {
-  const { current_value, target_value, final_value } = data;
+const GaugeChart = ({data, title}) => {
+  const { currentPercentage, targetPercentage } = data;
   
-  // Transforming values as percentages
-  const currentValuePercentage = current_value * 100 / final_value;
-  const targetValuePercentage = target_value * 100 / final_value;
-
   let current, toTarget, excess, remaining;
-  const diffToTarget = currentValuePercentage - targetValuePercentage;
+  const diffToTarget = currentPercentage - targetPercentage;
 
   // Now we transform percentages to degrees
   if (diffToTarget < 0 ){ // we don't reach to target value
-    current = setDegrees(currentValuePercentage);
+    current = setDegrees(currentPercentage);
     toTarget = setDegrees(Math.abs(diffToTarget));
     excess = 0;
     remaining = totalArchWidth - indicatorWidth - current - toTarget;
   }else if (diffToTarget > 0){ // we are exceeded from indificated target
-    current = setDegrees(targetValuePercentage);
+    current = setDegrees(targetPercentage);
     toTarget = 0;
     excess = setDegrees(Math.abs(diffToTarget));
     remaining = totalArchWidth - excess - indicatorWidth - current;
   }else {  // we reached the target value!
     toTarget = 0;
     excess = 0;
-    current = setDegrees(targetValuePercentage);
+    current = setDegrees(targetPercentage);
     remaining = totalArchWidth - indicatorWidth - current;
   }
   return(
-    final_value >= current_value ? 
-    <VictoryPie
-      labels={({datum}) => datum.label}
-      startAngle={- ( totalArchWidth / 2)}
-      endAngle={totalArchWidth / 2}
-      innerRadius={({datum}) => {
-        if (datum.x === 'Indicator'){
-          return 85
-        }else{
-          return 90
-        }
-      }} 
+    100 >= currentPercentage ? 
+    <View style={{justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderStyle: 'solid', borderColor: '#000'}}>
+      <Text style={{position: 'absolute', fontSize: 20}}>{currentPercentage}%</Text>
+      <VictoryPie
+        width={250}
+        height={250}
+        labels={({datum}) => datum.label}
+        startAngle={- ( totalArchWidth / 2)}
+        endAngle={totalArchWidth / 2}
+        cornerRadius={1}
+        innerRadius={({datum}) => {
+          if (datum.x === 'Indicator'){
+            return 85
+          }else{
+            return 90
+          }
+        }} 
 
-      radius={({ datum }) => {
-        if (datum.x === 'Indicator'){
-          return 120
-        }else{
-          return 115
-        }
-      }}
+        radius={({ datum }) => {
+          if (datum.x === 'Indicator'){
+            return 120
+          }else{
+            return 115
+          }
+        }}
 
-      data={[
-        { x: "Current Value", y: current, label: null },  
-        { x: 'Value to target', y: toTarget, label: null},
-        { x: "Indicator", y: indicatorWidth, label: null},
-        { x: "Excess value", y: excess, label: null}, 
-        { x: "Remaining value", y: remaining, label: null },
-      ]}
-      colorScale={[valueColor, emptyColor, indicatorColor, valueColor, emptyColor]}
-    /> : 
+        data={[
+          { x: "Current Value", y: current, label: null },
+          { x: "Space", y: current > 0 && (targetPercentage > currentPercentage) ? 1 : 0, label: null},  
+          { x: "Value to target", y: toTarget, label: null},
+          { x: "Indicator", y: indicatorWidth, label: null},
+          { x: "Excess value", y: excess, label: null}, 
+          { x: "Space", y: excess > 0 && (100 !== currentPercentage)? 1 : 0, label: null},
+          { x: "Remaining value", y: remaining, label: null },
+        ]}
+        colorScale={[valueColor, 'transparent', emptyColor, indicatorColor, valueColor, 'transparent', emptyColor]}
+      />
+      <Text>{title}</Text>
+    </View> : 
     <View>
       <Text>Review the props!</Text>
     </View>
